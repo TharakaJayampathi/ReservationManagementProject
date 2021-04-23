@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ReservationManagement.Data;
 using ReservationManagement.Models;
+using ReservationManagement.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -15,78 +20,116 @@ namespace ReservationManagement.Controllers
     public class BillController : Controller
     {
         private readonly AppDbContext _appDbContext;
+        private readonly IMapper _mapper;
 
-        
         /// </summary>
         /// <param name="appDbContext"></param>
 
-        public BillController(AppDbContext appDbContext)
+        public BillController(AppDbContext appDbContext, IMapper mapper)
         {
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
+
+        // GET: api/<BillController>
         [HttpGet]
-        public List<Bill> GetBill()
+        public async Task<IActionResult> GetAllAsync()
         {
+            var res = await _appDbContext.Bills
+                 .Select(BillViewModel.SelectAllBill)
+                 .ToListAsync();
 
+            return Ok(res);
 
-            return _appDbContext.Bills.ToList();
         }
 
-        [HttpGet("{Id})")]
-        public Bill GetBillBuild(int Id)
-        {
 
-            return _appDbContext.Bills.FirstOrDefault(x => x.Id == Id);
+
+        // GET api/<BillController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var res = await _appDbContext.Bills
+                .Select(BillViewModel.SelectById)
+                .FirstOrDefaultAsync();
+
+            return Ok(res);
         }
 
+
+
+        // POST api/<BillController>
         [HttpPost]
-        public List<Bill> AddNewBill([FromBody] Bill bill)
-        {
-            _appDbContext.Add(bill);
-            _appDbContext.SaveChanges();
-            return _appDbContext.Bills.ToList();
-        }
 
-        // PUT api/<BillsController>/5
-        [HttpPut("{id}")]
-        public List<Bill> Bills(int id, [FromBody] Bill bill)
+        public async Task<IActionResult> PostAsync([FromBody] BillForm billForm)
         {
-            if (id == bill.Id)
+            try
             {
-                _appDbContext.Bills.Update(bill);
-                _appDbContext.SaveChanges();
-                return _appDbContext.Bills.ToList();
+                var modelresources = _mapper.Map<Bill>(billForm);
+                await _appDbContext.Bills.AddAsync(modelresources);
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Bills
+                    .Select(BillViewModel.SelectAllBill)
+                    .ToListAsync();
+
+                return Ok(res);
             }
+            catch (Exception ex)
+            {
 
-            return null;
-
+                return BadRequest(ex);
+            }
         }
 
-        //[HttpPut]
-        //public List<Bill> UpdateBill([FromBody] Bill bill)
-        //{
-        //    _appDbContext.Update(bill);
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Bills.ToList();
-        //}
-
-        //[HttpPut]
-        //public List<Bill> UpdateBillFromId(int id)
-        //{
-        //    _appDbContext.Update(new Bill { Id = id });
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Bills.ToList();
-        //}
 
 
-
-        [HttpDelete]
-        public List<Bill> DeleteBillFromId(int id)
+        // PUT api/<BillController>/5
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync([FromBody] BillForm billForm)
         {
-            _appDbContext.Remove(new Bill { Id = id });
-            _appDbContext.SaveChanges();
-            return _appDbContext.Bills.ToList();
+
+            try
+            {
+                var modelresources = _mapper.Map<Bill>(billForm);
+                _appDbContext.Bills.Update(modelresources);
+                _appDbContext.SaveChanges();
+
+                var res = await _appDbContext.Bills
+                     .Select(BillViewModel.SelectAllBill)
+                     .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
+        }
+
+
+        // DELETE api/<BillController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                _appDbContext.Bills.Remove(new Bill { Id = id });
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Bills
+                    .Select(BillViewModel.SelectAllBill)
+                    .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
         }
     }
 }

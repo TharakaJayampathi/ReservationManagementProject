@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ReservationManagement.Data;
 using ReservationManagement.Models;
+using ReservationManagement.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,78 +20,116 @@ namespace ReservationManagement.Controllers
     public class BookingController : Controller
     {
         private readonly AppDbContext _appDbContext;
+        private readonly IMapper _mapper;
 
-        
         /// </summary>
         /// <param name="appDbContext"></param>
 
-        public BookingController(AppDbContext appDbContext)
+        public BookingController(AppDbContext appDbContext, IMapper mapper)
         {
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
+
+        // GET: api/<BookingController>
         [HttpGet]
-        public List<Booking> GetBooking()
+        public async Task<IActionResult> GetAllAsync()
         {
+            var res = await _appDbContext.Bookings
+                 .Select(BookingViewModel.SelectAllBooking)
+                 .ToListAsync();
 
+            return Ok(res);
 
-            return _appDbContext.Bookings.ToList();
         }
 
-        [HttpGet("{Id})")]
-        public Booking GetBookingBuild(int Id)
-        {
 
-            return _appDbContext.Bookings.FirstOrDefault(x => x.Id == Id);
+
+        // GET api/<BookingController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var res = await _appDbContext.Bookings
+                .Select(BookingViewModel.SelectById)
+                .FirstOrDefaultAsync();
+
+            return Ok(res);
         }
 
+
+
+        // POST api/<BookingController>
         [HttpPost]
-        public List<Booking> AddNewBooking([FromBody] Booking booking)
-        {
-            _appDbContext.Add(booking);
-            _appDbContext.SaveChanges();
-            return _appDbContext.Bookings.ToList();
-        }
 
-        // PUT api/<BookingsController>/5
-        [HttpPut("{id}")]
-        public List<Booking> Bookings(int id, [FromBody] Booking booking)
+        public async Task<IActionResult> PostAsync([FromBody] BookingForm bookingForm)
         {
-            if (id == booking.Id)
+            try
             {
-                _appDbContext.Bookings.Update(booking);
-                _appDbContext.SaveChanges();
-                return _appDbContext.Bookings.ToList();
+                var modelresources = _mapper.Map<Booking>(bookingForm);
+                await _appDbContext.Bookings.AddAsync(modelresources);
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Bookings
+                    .Select(BookingViewModel.SelectAllBooking)
+                    .ToListAsync();
+
+                return Ok(res);
             }
+            catch (Exception ex)
+            {
 
-            return null;
-
+                return BadRequest(ex);
+            }
         }
 
-        //[HttpPut]
-        //public List<Booking> UpdateBooking([FromBody] Booking booking)
-        //{
-        //    _appDbContext.Update(booking);
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Bookings.ToList();
-        //}
-
-        //[HttpPut]
-        //public List<Booking> UpdateRoomFromId(int id)
-        //{
-        //    _appDbContext.Update(new Booking { Id = id });
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Bookings.ToList();
-        //}
 
 
-
-        [HttpDelete]
-        public List<Booking> DeleteBookingFromId(int id)
+        // PUT api/<BookingController>/5
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync([FromBody] BookingForm bookingForm)
         {
-            _appDbContext.Remove(new Booking { Id = id });
-            _appDbContext.SaveChanges();
-            return _appDbContext.Bookings.ToList();
+
+            try
+            {
+                var modelresources = _mapper.Map<Booking>(bookingForm);
+                _appDbContext.Bookings.Update(modelresources);
+                _appDbContext.SaveChanges();
+
+                var res = await _appDbContext.Bookings
+                     .Select(BookingViewModel.SelectAllBooking)
+                     .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
+        }
+
+
+        // DELETE api/<BookingController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                _appDbContext.Bookings.Remove(new Booking { Id = id });
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Bookings
+                    .Select(BookingViewModel.SelectAllBooking)
+                    .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
         }
     }
 }

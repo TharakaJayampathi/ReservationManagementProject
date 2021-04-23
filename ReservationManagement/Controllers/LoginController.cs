@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ReservationManagement.Application;
 using ReservationManagement.Data;
-using ReservationManagement.Models;
+using ReservationManagement.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,90 +9,29 @@ using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace ReservationManagement.Controllers
+namespace InventoryMnagement.Controllers
 {
-    [Route("api/login")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class LoginController : Controller
+    public class LoginController : ControllerBase
     {
         private readonly AppDbContext _appDbContext;
-
-       
-        /// <param name="appDbContext"></param>
-
         public LoginController(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
         }
 
         [HttpGet]
-        public List<Login> GetLogin()
+        public async Task<IActionResult> CheckLoginDetailsAsync([FromQuery] LoginForm loginForm)
         {
+            var data = await _appDbContext.Logins.Where(x => x.Email == loginForm.Email).FirstOrDefaultAsync();
 
-
-            return _appDbContext.Logins.ToList();
-        }
-
-        [HttpGet("{Id})")]
-        public Login GetLoginBuild(int Id)
-        {
-
-            return _appDbContext.Logins.FirstOrDefault(x => x.Id == Id);
-        }
-
-        [HttpPost]
-        public List<Login> AddNewLogin([FromBody] Login login)
-        {
-
-            _appDbContext.Add(login);
-            _appDbContext.SaveChanges();
-            return _appDbContext.Logins.ToList();
-        }
-
-        [HttpDelete]
-        public List<Login> DeleteLoginFromId(int id)
-        {
-            _appDbContext.Remove(new Login { Id = id });
-            _appDbContext.SaveChanges();
-            return _appDbContext.Logins.ToList();
-        }
-
-        [HttpPost("login")]
-
-        public Result ValidateLogin([FromBody] LoginViewModel loginViewModel)
-        {
-            var x = _appDbContext.Logins.FirstOrDefault(x => x.Email == loginViewModel.Email);
-
-            if (x == null)
+            if (data.Password == loginForm.Password)
             {
-                return Result.NotFound();
+                return Ok("valid");
             }
 
-            if (x.Password != loginViewModel.Password)
-            {
-                return Result.Failed();
-            }
-
-            var data = _appDbContext.Customers.Include(x => x.Usermanagement).FirstOrDefault(x => x.Email == loginViewModel.Email);
-            if (data.Age <= 18)
-            {
-                return Result.Success(data);
-            }
-
-            else
-            {
-                return Result.Unsuccess("Your age is not 18+", 400);
-            }
-
-
-
-
-
-
+            return Unauthorized();
         }
-
-
-
     }
-
 }

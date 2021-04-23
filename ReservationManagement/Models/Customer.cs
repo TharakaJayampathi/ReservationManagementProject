@@ -28,6 +28,7 @@ namespace ReservationManagement.Models
         public string Address { get; set; }
         public int Age { get; set; }
 
+        public int UsermanagementId { get; set; }
         public Usermanagement Usermanagement { get; set; }
 
 

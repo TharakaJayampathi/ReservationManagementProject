@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ReservationManagement.Data;
 using ReservationManagement.Models;
+using ReservationManagement.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,69 +20,116 @@ namespace ReservationManagement.Controllers
     public class CustomerController : Controller
     {
         private readonly AppDbContext _appDbContext;
+        private readonly IMapper _mapper;
 
-        
         /// </summary>
         /// <param name="appDbContext"></param>
 
-        public CustomerController(AppDbContext appDbContext)
+        public CustomerController(AppDbContext appDbContext, IMapper mapper)
         {
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
+
+        // GET: api/<CustomerController>
         [HttpGet]
-        public List<Customer> GetCustomerModel()
+        public async Task<IActionResult> GetAllAsync()
         {
+            var res = await _appDbContext.Customers
+                 .Select(CustomerViewModel.SelectAllCustomer)
+                 .ToListAsync();
 
+            return Ok(res);
 
-            return _appDbContext.Customers.ToList();
-        }
-
-        [HttpGet("{Id})")]
-        public Customer GetCustomerBuild(int Id)
-        {
-
-            return _appDbContext.Customers.FirstOrDefault(x => x.Id == Id);
         }
 
 
+
+        // GET api/<CustomerController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var res = await _appDbContext.Customers
+                .Select(CustomerViewModel.SelectById)
+                .FirstOrDefaultAsync();
+
+            return Ok(res);
+        }
+
+
+
+        // POST api/<CustomerController>
         [HttpPost]
-        public List<Customer> AddNewCustomer([FromBody] Customer customerModel)
-        {
-            _appDbContext.Add(customerModel);
-            _appDbContext.SaveChanges();
-            return _appDbContext.Customers.ToList();
-        }
 
-        // PUT api/<CustomersController>/5
-        [HttpPut("{id}")]
-        public List<Customer> Customers(int id, [FromBody] Customer customer)
+        public async Task<IActionResult> PostAsync([FromBody] CustomerForm customerForm)
         {
-            if (id == customer.Id)
+            try
             {
-                _appDbContext.Customers.Update(customer);
-                _appDbContext.SaveChanges();
-                return _appDbContext.Customers.ToList();
+                var modelresources = _mapper.Map<Customer>(customerForm);
+                await _appDbContext.Customers.AddAsync(modelresources);
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Customers
+                    .Select(CustomerViewModel.SelectAllCustomer)
+                    .ToListAsync();
+
+                return Ok(res);
             }
+            catch (Exception ex)
+            {
 
-            return null;
-
+                return BadRequest(ex);
+            }
         }
 
-        //[HttpPut]
-        //public List<Customer> UpdateRoomFromId(int id)
-        //{
-        //    _appDbContext.Update(new Customer { Id = id });
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Customers.ToList();
-        //}
 
-        [HttpDelete]
-        public List<Customer> DeleteCustomerFromId(int id)
+
+        // PUT api/<CustomerController>/5
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync([FromBody] CustomerForm customerForm)
         {
-            _appDbContext.Remove(new Customer { Id = id });
-            _appDbContext.SaveChanges();
-            return _appDbContext.Customers.ToList();
+
+            try
+            {
+                var modelresources = _mapper.Map<Customer>(customerForm);
+                _appDbContext.Customers.Update(modelresources);
+                _appDbContext.SaveChanges();
+
+                var res = await _appDbContext.Customers
+                     .Select(CustomerViewModel.SelectAllCustomer)
+                     .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
+        }
+
+
+        // DELETE api/<CustomerController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                _appDbContext.Customers.Remove(new Customer { Id = id });
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Customers
+                    .Select(CustomerViewModel.SelectAllCustomer)
+                    .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
         }
     }
 }
