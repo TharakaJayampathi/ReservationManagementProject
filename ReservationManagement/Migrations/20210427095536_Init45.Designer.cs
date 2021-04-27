@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ReservationManagement.Data;
 
 namespace ReservationManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210427095536_Init45")]
+    partial class Init45
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +34,7 @@ namespace ReservationManagement.Migrations
                     b.Property<int>("Days")
                         .HasColumnType("int");
 
-                    b.Property<double>("Payment")
+                    b.Property<double>("Paymentvalue")
                         .HasColumnType("float");
 
                     b.Property<double>("RoomTypeAmount")

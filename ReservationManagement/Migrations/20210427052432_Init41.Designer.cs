@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ReservationManagement.Data;
 
 namespace ReservationManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210427052432_Init41")]
+    partial class Init41
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,9 +113,6 @@ namespace ReservationManagement.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<int>("PaymentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PhoneNo")
                         .HasColumnType("nvarchar(max)");
 
@@ -122,8 +121,6 @@ namespace ReservationManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PaymentId");
 
                     b.ToTable("Customers");
                 });
@@ -271,17 +268,6 @@ namespace ReservationManagement.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Usermanagements");
-                });
-
-            modelBuilder.Entity("ReservationManagement.Models.Customer", b =>
-                {
-                    b.HasOne("ReservationManagement.Models.Payment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Payment");
                 });
 #pragma warning restore 612, 618
         }

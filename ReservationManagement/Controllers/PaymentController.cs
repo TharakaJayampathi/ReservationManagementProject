@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ReservationManagement.Data;
 using ReservationManagement.Models;
+using ReservationManagement.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,78 +18,116 @@ namespace ReservationManagement.Controllers
     public class PaymentController : Controller
     {
         private readonly AppDbContext _appDbContext;
-
+        private readonly IMapper _mapper;
 
         /// </summary>
         /// <param name="appDbContext"></param>
 
-        public PaymentController(AppDbContext appDbContext)
+        public PaymentController(AppDbContext appDbContext, IMapper mapper)
         {
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
+
+        // GET: api/<PaymentController>
         [HttpGet]
-        public List<Payment> GetPayment()
+        public async Task<IActionResult> GetAllAsync()
         {
+            var res = await _appDbContext.Payments
+                 .Select(PaymentViewModel.SelectAllPayment)
+                 .ToListAsync();
 
+            return Ok(res);
 
-            return _appDbContext.Payments.ToList();
         }
 
-        [HttpGet("{Id})")]
-        public Payment GetPaymentBuild(int Id)
-        {
 
-            return _appDbContext.Payments.FirstOrDefault(x => x.Id == Id);
+
+        // GET api/<PaymentController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var res = await _appDbContext.Payments
+                .Select(PaymentViewModel.SelectById)
+                .FirstOrDefaultAsync();
+
+            return Ok(res);
         }
 
+
+
+        // POST api/<Controller>
         [HttpPost]
-        public List<Payment> AddNewPayment([FromBody] Payment payment)
-        {
-            _appDbContext.Add(payment);
-            _appDbContext.SaveChanges();
-            return _appDbContext.Payments.ToList();
-        }
 
-        // PUT api/<PaymentsController>/5
-        [HttpPut("{id}")]
-        public List<Payment> Payments(int id, [FromBody] Payment payment)
+        public async Task<IActionResult> PostAsync([FromBody] PaymentForm paymentForm)
         {
-            if (id == payment.Id)
+            try
             {
-                _appDbContext.Payments.Update(payment);
-                _appDbContext.SaveChanges();
-                return _appDbContext.Payments.ToList();
+                var modelresources = _mapper.Map<Payment>(paymentForm);
+                await _appDbContext.Payments.AddAsync(modelresources);
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Payments
+                    .Select(PaymentViewModel.SelectAllPayment)
+                    .ToListAsync();
+
+                return Ok(res);
             }
+            catch (Exception ex)
+            {
 
-            return null;
-
+                return BadRequest(ex);
+            }
         }
 
-        //[HttpPut]
-        //public List<Payment> UpdatePayment([FromBody] Payment payment)
-        //{
-        //    _appDbContext.Update(payment);
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Payments.ToList();
-        //}
-
-        //[HttpPut]
-        //public List<Payment> UpdatePaymentFromId(int id)
-        //{
-        //    _appDbContext.Update(new Payment { Id = id });
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Payments.ToList();
-        //}
 
 
-
-        [HttpDelete]
-        public List<Payment> DeletePaymentFromId(int id)
+        // PUT api/<PaymentController>/5
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync([FromBody] PaymentForm paymentForm)
         {
-            _appDbContext.Remove(new Payment { Id = id });
-            _appDbContext.SaveChanges();
-            return _appDbContext.Payments.ToList();
+
+            try
+            {
+                var modelresources = _mapper.Map<Payment>(paymentForm);
+                _appDbContext.Payments.Update(modelresources);
+                _appDbContext.SaveChanges();
+
+                var res = await _appDbContext.Payments
+                     .Select(PaymentViewModel.SelectAllPayment)
+                     .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
+        }
+
+
+        // DELETE api/<PaymentController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                _appDbContext.Payments.Remove(new Payment { Id = id });
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Payments
+                    .Select(PaymentViewModel.SelectAllPayment)
+                    .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
         }
     }
 }

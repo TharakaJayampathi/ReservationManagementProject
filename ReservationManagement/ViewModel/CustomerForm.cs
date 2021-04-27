@@ -13,9 +13,6 @@ namespace ReservationManagement.ViewModel
         public int Id { get; set; }
 
         [Required]
-        public string Email { get; set; }
-
-        [Required]
         [StringLength(150)]
         public string FirstName { get; set; }
 
@@ -26,11 +23,26 @@ namespace ReservationManagement.ViewModel
         public string PhoneNo { get; set; }
 
         [Required]
+        public string Email { get; set; }
+
+        [Required]
         [StringLength(150)]
         public string Address { get; set; }
-        public int Age { get; set; }
 
-        public int UsermanagementId { get; set; }
+        [Required]
+        public string PostalCode { get; set; }
+
+        [Required]
+        public string City { get; set; }
+
+
+        [Required]
+        public string Country { get; set; }
+
+        [Required]
+        public int PaymentId { get; set; }
+
+
     }
 
     public static class CustomerViewModel
@@ -40,25 +52,29 @@ namespace ReservationManagement.ViewModel
             x => new
             {
                 Id = x.Id,
-                Email = x.Email,
                 FirstName = x.FirstName,
                 LastName = x.LastName,
                 PhoneNo = x.PhoneNo,
+                Email = x.Email,
                 Address = x.Address,
-                Age = x.Age,
-                UsermanagementId = x.UsermanagementId
+                PostalCode = x.PostalCode,
+                City = x.City,
+                Country = x.Country
+               
             };
         public static Expression<Func<Customer, object>> SelectById =>
             x => new
             {
                 Id = x.Id,
-                Email = x.Email,
                 FirstName = x.FirstName,
                 LastName = x.LastName,
                 PhoneNo = x.PhoneNo,
+                Email = x.Email,
                 Address = x.Address,
-                Age = x.Age,
-                UsermanagementId = x.UsermanagementId
+                PostalCode = x.PostalCode,
+                City = x.City,
+                Country = x.Country
+
             };
 
 

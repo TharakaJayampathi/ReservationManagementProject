@@ -12,11 +12,13 @@ namespace ReservationManagement.Services
     {
         public AutoMapper()
         {
-            CreateMap<RoomForm, Room>();
             CreateMap<BillForm, Bill>();
             CreateMap<BookingForm, Booking>();
             CreateMap<CustomerForm, Customer>();
             CreateMap<LoginForm, Login>();
+            CreateMap<PaymentForm, Payment>();
+            CreateMap<RoomForm, Room>();
+
 
         }
     }
