@@ -33,7 +33,7 @@ namespace ReservationManagement.ViewModel
         public string PassportNo { get; set; }
 
         [Required]
-        public string RegisteredDate { get; set; }
+        public DateTime RegisteredDate { get; set; }
 
         [Required]
         public string PostalCode { get; set; }
@@ -46,7 +46,16 @@ namespace ReservationManagement.ViewModel
         public string Country { get; set; }
 
         [Required]
-        public int PaymentId { get; set; }
+        public string PaymentMethod { get; set; }
+
+        [Required]
+        public string CardNo { get; set; }
+
+        [Required]
+        public string ExpiryDate { get; set; }
+
+        [Required]
+        public string CardName { get; set; }
 
 
     }
@@ -67,8 +76,15 @@ namespace ReservationManagement.ViewModel
                 RegisteredDate = x.RegisteredDate,
                 PostalCode = x.PostalCode,
                 City = x.City,
-                Country = x.Country
-               
+                Country = x.Country,
+                PaymentMethod = x.PaymentMethod,
+                CardNo = x.CardNo,
+                ExpiryDate = x.ExpiryDate,
+                CardName = x.CardName
+
+
+
+
             };
         public static Expression<Func<Customer, object>> SelectById =>
             x => new
@@ -79,9 +95,15 @@ namespace ReservationManagement.ViewModel
                 PhoneNo = x.PhoneNo,
                 Email = x.Email,
                 Address = x.Address,
+                PassportNo = x.PassportNo,
+                RegisteredDate = x.RegisteredDate,
                 PostalCode = x.PostalCode,
                 City = x.City,
-                Country = x.Country
+                Country = x.Country,
+                PaymentMethod = x.PaymentMethod,
+                CardNo = x.CardNo,
+                ExpiryDate = x.ExpiryDate,
+                CardName = x.CardName
 
             };
 

@@ -31,7 +31,7 @@ namespace ReservationManagement.Models
         public string PassportNo { get; set; }
 
         [Required]
-        public string RegisteredDate { get; set; }
+        public DateTime RegisteredDate { get; set; }
 
         [Required]
         public string PostalCode { get; set; }
@@ -44,15 +44,16 @@ namespace ReservationManagement.Models
         public string Country { get; set; }
 
         [Required]
-        public int PaymentId { get; set; }
+        public string PaymentMethod { get; set; }
 
-        public Payment Payment { get; set; }
+        [Required]
+        public string CardNo { get; set; }
 
+        [Required]
+        public string ExpiryDate { get; set; }
 
-
-
-
-
+        [Required]
+        public string CardName { get; set; }
 
     }
 }

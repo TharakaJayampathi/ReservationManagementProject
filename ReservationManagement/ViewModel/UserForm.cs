@@ -53,7 +53,7 @@ namespace ReservationManagement.ViewModel
                 PhoneNo = x.PhoneNo,
                 Address = x.Address,
                 Age = x.Age,
-                Description = x.Age
+                Description = x.Description
             };
         public static Expression<Func<User, object>> SelectById =>
             x => new
@@ -66,7 +66,7 @@ namespace ReservationManagement.ViewModel
                 PhoneNo = x.PhoneNo,
                 Address = x.Address,
                 Age = x.Age,
-                Description = x.Age
+                Description = x.Description
             };
 
 
