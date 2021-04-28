@@ -18,6 +18,8 @@ namespace ReservationManagement.Services
             CreateMap<LoginForm, Login>();
             CreateMap<PaymentForm, Payment>();
             CreateMap<RoomForm, Room>();
+            CreateMap<UserForm, User>();
+            CreateMap<ReservationplanForm, Reservationplan>();
 
 
         }

@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ReservationManagement.Data;
 using ReservationManagement.Models;
+using ReservationManagement.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,69 +18,116 @@ namespace ReservationManagement.Controllers
     public class UserController : Controller
     {
         private readonly AppDbContext _appDbContext;
+        private readonly IMapper _mapper;
 
-        /// <summary>
-        /// Dispendency Enjection (DI)
         /// </summary>
         /// <param name="appDbContext"></param>
 
-        public UserController(AppDbContext appDbContext)
+        public UserController(AppDbContext appDbContext, IMapper mapper)
         {
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
+
+        // GET: api/<UserController>
         [HttpGet]
-        public List<User> GetUserModel()
+        public async Task<IActionResult> GetAllAsync()
         {
+            var res = await _appDbContext.Users
+                 .Select(UserViewModel.SelectAllUser)
+                 .ToListAsync();
 
+            return Ok(res);
 
-            return _appDbContext.Users.ToList();
         }
 
-        [HttpGet("{Id})")]
-        public User GetUserBuild(int Id)
-        {
 
-            return _appDbContext.Users.FirstOrDefault(x => x.Id == Id);
+
+        // GET api/<UserController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var res = await _appDbContext.Users
+                .Select(UserViewModel.SelectById)
+                .FirstOrDefaultAsync();
+
+            return Ok(res);
         }
 
+
+
+        // POST api/<UserController>
         [HttpPost]
-        public List<User> AddNewUser([FromBody] User userModel)
-        {
-            _appDbContext.Add(userModel);
-            _appDbContext.SaveChanges();
-            return _appDbContext.Users.ToList();
-        }
 
-        // PUT api/<UsersController>/5
-        [HttpPut("{id}")]
-        public List<User> Users(int id, [FromBody] User user)
+        public async Task<IActionResult> PostAsync([FromBody] UserForm userForm)
         {
-            if (id == user.Id)
+            try
             {
-                _appDbContext.Users.Update(user);
-                _appDbContext.SaveChanges();
-                return _appDbContext.Users.ToList();
+                var modelresources = _mapper.Map<User>(userForm);
+                await _appDbContext.Users.AddAsync(modelresources);
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Users
+                    .Select(UserViewModel.SelectAllUser)
+                    .ToListAsync();
+
+                return Ok(res);
             }
+            catch (Exception ex)
+            {
 
-            return null;
-
+                return BadRequest(ex);
+            }
         }
 
-        //[HttpPut]
-        //public List<User> UpdateRoomFromId(int id)
-        //{
-        //    _appDbContext.Update(new User { Id = id });
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Users.ToList();
-        //}
 
-        [HttpDelete]
-        public List<User> DeleteUserFromId(int id)
+
+        // PUT api/<UserController>/5
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync([FromBody] UserForm userForm)
         {
-            _appDbContext.Remove(new User { Id = id });
-            _appDbContext.SaveChanges();
-            return _appDbContext.Users.ToList();
+
+            try
+            {
+                var modelresources = _mapper.Map<User>(userForm);
+                _appDbContext.Users.Update(modelresources);
+                _appDbContext.SaveChanges();
+
+                var res = await _appDbContext.Users
+                     .Select(UserViewModel.SelectAllUser)
+                     .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
+        }
+
+
+        // DELETE api/<UserController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                _appDbContext.Users.Remove(new User { Id = id });
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Users
+                    .Select(UserViewModel.SelectAllUser)
+                    .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
         }
     }
 }

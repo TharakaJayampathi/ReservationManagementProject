@@ -18,7 +18,6 @@ namespace ReservationManagement.Data
         public DbSet<Login> Logins { get; set; }
         public DbSet<Bill> Bills { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<Usermanagement> Usermanagements { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Reservationplan> Reservationplans { get; set; }

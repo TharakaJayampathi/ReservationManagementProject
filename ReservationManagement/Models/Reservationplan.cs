@@ -22,7 +22,7 @@ namespace ReservationManagement.Models
 
         //[Required]
         //public int Days { get; set; }
-        public int CustomerId { get; set; }
+        //public int CustomerId { get; set; }
 
         //public double _payment;
         //public double Payment

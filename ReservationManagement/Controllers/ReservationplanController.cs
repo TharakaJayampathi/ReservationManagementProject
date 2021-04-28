@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ReservationManagement.Data;
 using ReservationManagement.Models;
+using ReservationManagement.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,69 +20,116 @@ namespace ReservationManagement.Controllers
     public class ReservationplanController : Controller
     {
         private readonly AppDbContext _appDbContext;
+        private readonly IMapper _mapper;
 
-        /// <summary>
-        /// Dispendency Enjection (DI)
         /// </summary>
         /// <param name="appDbContext"></param>
 
-        public ReservationplanController(AppDbContext appDbContext)
+        public ReservationplanController(AppDbContext appDbContext, IMapper mapper)
         {
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
+
+        // GET: api/<ReservationplanController>
         [HttpGet]
-        public List<Reservationplan> GetReservationplan()
+        public async Task<IActionResult> GetAllAsync()
         {
+            var res = await _appDbContext.Reservationplans
+                 .Select(ReservationplanViewModel.SelectAllReservationplan)
+                 .ToListAsync();
 
+            return Ok(res);
 
-            return _appDbContext.Reservationplans.ToList();
         }
 
-        [HttpGet("{Id})")]
-        public Reservationplan GetRseervationplanBuild(int Id)
-        {
 
-            return _appDbContext.Reservationplans.FirstOrDefault(x => x.Id == Id);
+
+        // GET api/<ReservationplanController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var res = await _appDbContext.Reservationplans
+                .Select(ReservationplanViewModel.SelectById)
+                .FirstOrDefaultAsync();
+
+            return Ok(res);
         }
 
+
+
+        // POST api/<ReservationplanController>
         [HttpPost]
-        public List<Reservationplan> AddNewReservationplan([FromBody] Reservationplan reservationplan)
-        {
-            _appDbContext.Add(reservationplan);
-            _appDbContext.SaveChanges();
-            return _appDbContext.Reservationplans.ToList();
-        }
 
-        // PUT api/<ReservationplansController>/5
-        [HttpPut("{id}")]
-        public List<Reservationplan> Reservationplans(int id, [FromBody] Reservationplan reservationplan)
+        public async Task<IActionResult> PostAsync([FromBody] ReservationplanForm reservationplanForm)
         {
-            if (id == reservationplan.Id)
+            try
             {
-                _appDbContext.Reservationplans.Update(reservationplan);
-                _appDbContext.SaveChanges();
-                return _appDbContext.Reservationplans.ToList();
+                var modelresources = _mapper.Map<Reservationplan>(reservationplanForm);
+                await _appDbContext.Reservationplans.AddAsync(modelresources);
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Reservationplans
+                    .Select(ReservationplanViewModel.SelectAllReservationplan)
+                    .ToListAsync();
+
+                return Ok(res);
             }
+            catch (Exception ex)
+            {
 
-            return null;
-
+                return BadRequest(ex);
+            }
         }
 
-        //[HttpPut]
-        //public List<Customer> UpdateReservationplanFromId(int id)
-        //{
-        //    _appDbContext.Update(new Reservationplan { Id = id });
-        //    _appDbContext.SaveChanges();
-        //    return _appDbContext.Reservationplans.ToList();
-        //}
 
-        [HttpDelete]
-        public List<Reservationplan> DeleteReservationplanFromId(int id)
+
+        // PUT api/<ReservationplanController>/5
+        [HttpPut]
+        public async Task<IActionResult> UpdateAsync([FromBody] ReservationplanForm reservationplanForm)
         {
-            _appDbContext.Remove(new Reservationplan { Id = id });
-            _appDbContext.SaveChanges();
-            return _appDbContext.Reservationplans.ToList();
+
+            try
+            {
+                var modelresources = _mapper.Map<Reservationplan>(reservationplanForm);
+                _appDbContext.Reservationplans.Update(modelresources);
+                _appDbContext.SaveChanges();
+
+                var res = await _appDbContext.Reservationplans
+                     .Select(ReservationplanViewModel.SelectAllReservationplan)
+                     .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
+        }
+
+
+        // DELETE api/<ReservationplanController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                _appDbContext.Reservationplans.Remove(new Reservationplan { Id = id });
+                await _appDbContext.SaveChangesAsync();
+
+                var res = await _appDbContext.Reservationplans
+                    .Select(ReservationplanViewModel.SelectAllReservationplan)
+                    .ToListAsync();
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex);
+            }
         }
     }
 }

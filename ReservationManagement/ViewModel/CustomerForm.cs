@@ -30,6 +30,12 @@ namespace ReservationManagement.ViewModel
         public string Address { get; set; }
 
         [Required]
+        public string PassportNo { get; set; }
+
+        [Required]
+        public string RegisteredDate { get; set; }
+
+        [Required]
         public string PostalCode { get; set; }
 
         [Required]
@@ -57,6 +63,8 @@ namespace ReservationManagement.ViewModel
                 PhoneNo = x.PhoneNo,
                 Email = x.Email,
                 Address = x.Address,
+                PassportNo = x.PassportNo,
+                RegisteredDate = x.RegisteredDate,
                 PostalCode = x.PostalCode,
                 City = x.City,
                 Country = x.Country

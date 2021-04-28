@@ -28,6 +28,12 @@ namespace ReservationManagement.Models
         public string Address { get; set; }
 
         [Required]
+        public string PassportNo { get; set; }
+
+        [Required]
+        public string RegisteredDate { get; set; }
+
+        [Required]
         public string PostalCode { get; set; }
 
         [Required]
